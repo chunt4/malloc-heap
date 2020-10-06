@@ -22,6 +22,10 @@ Block FreeList = {-1, -1, &FreeList, &FreeList};
  **/
 Block * free_list_search_ff(size_t size) {
     // TODO: Implement first fit algorithm
+    for (Block *curr = FreeList.next; curr != &FreeList; curr= curr->next){
+        if (curr->capacity >= size)
+            return curr;
+    }
     return NULL;
 }
 
@@ -85,6 +89,13 @@ Block * free_list_search(size_t size) {
  **/
 void	free_list_insert(Block *block) {
     // TODO: Implement free list insertion
+    Block *tail = FreeList.prev;
+    tail->next = block;
+    FreeList.prev = block;
+    block->next = &FreeList;
+    block->prev = tail;
+
+    return NULL;
 }
 
 /**

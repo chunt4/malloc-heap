@@ -55,6 +55,7 @@ void free(void *ptr) {
     Counters[FREES]++;
 
     // TODO: Try to release block, otherwise insert it into the free list
+    Block *block = BLOCK_FROM_POINTER(ptr);
 }
 
 /**

@@ -65,6 +65,16 @@ bool	block_release(Block *block) {
  **/
 Block * block_detach(Block *block) {
     // TODO: Detach block from neighbors by updating previous and next block
+    if (block){
+        Block *before = block->prev;
+        Block *after  = block->next;
+
+        before->next = after;
+        after->prev = brefore;
+
+        block->prev = block;
+        block->next = block;
+    }
     return block;
 }
 
