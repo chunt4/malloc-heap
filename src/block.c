@@ -26,7 +26,7 @@ Block *	block_allocate(size_t size) {
     	return NULL;
     }
 
-    // Record block information
+    // Record block informations
     block->capacity = ALIGN(size);
     block->size     = size;
     block->prev     = block;

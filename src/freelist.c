@@ -88,7 +88,7 @@ Block * free_list_search(size_t size) {
  * @param   block   Pointer to block to insert into free list.
  **/
 void	free_list_insert(Block *block) {
-    // TODO: Implement free list insertion
+    // TODO: Implement free list insertions
     Block *tail = FreeList.prev;
     tail->next = block;
     FreeList.prev = block;
