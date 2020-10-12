@@ -46,7 +46,21 @@ void init_counters() {
  **/
 double  internal_fragmentation() {
     // TODO: Implement internal fragmentation computation
-    return 0;
+    size_t largestFree = 0;
+    size_t totalFree   = 0;
+
+    if (Counters[HEAP_SIZE] == 0)
+        return 0;
+
+    for (Block *block = FreeList.next; block != &FreeList; block->next){
+        if(block->capacity > largestFree)
+            largestFree = block->capacity;
+        totalFree += block->capacity;
+    }
+    
+    if (totalFree == 0)
+        return 0;
+    return (double)totalFree / Counters[HEAP_SIZE] * 100;
 }
 
 /**
@@ -60,7 +74,18 @@ double  internal_fragmentation() {
  **/
 double  external_fragmentation() {
     // TODO: Implement external fragmentation computation
-    return 0;
+    size_t largestFree = 0;
+    size_t totalFree   = 0;
+
+    for (Block *block = FreeList.next; block != &FreeList; block = block->next){
+        if (block->capacity > largestFree)
+            largestFree = block->capacity;
+        totalFree += blck->capacity;
+    }
+
+    if (totalFree == 0)
+        return 0;
+    return (1 - ((double)largestFree/totalFree)) * 100;
 }
 
 /**
