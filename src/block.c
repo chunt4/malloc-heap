@@ -50,10 +50,28 @@ Block *	block_allocate(size_t size) {
  **/
 bool	block_release(Block *block) {
     // TODO: Implement block release
-    // size_t allocated = 0;
+    size_t allocated = 0;
     // Counters[BLOCKS]--;
     // Counters[SHRINKS]++;
     // Counters[HEAP_SIZE] -= allocated;
+
+    intptr_t endHeap  = (intptr_t)sbrk(0);
+    if (endHeap == SBRK_FAILURE)
+        return false;
+
+    size_t blockPos = block->data + block->capacity;
+    size_t blockSiz = sizeof(Block) + block->capacity;
+
+    if ((intptr_t)blockPos != endHeap || blockSiz < TRIM_THRESHOLD)
+        return false;
+
+    allocated = sbrk(blockSiz * -1);
+    if (allocated == SBRK_FAILURE)
+        return false;
+
+    Counters[BLOCKS]--;
+    Counters[SHRINKS]++;
+    Counters[HEAP_SIZE] -= blockSiz;
     return true;
 }
 
