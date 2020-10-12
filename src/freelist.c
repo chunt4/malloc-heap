@@ -104,7 +104,15 @@ void	free_list_insert(Block *block) {
  **/
 size_t  free_list_length() {
     // TODO: Implement free list length
-    return 0;
+    size_t length = 0;
+    Block *curr = FreeList.next;
+    if (curr != NULL){
+        do{
+            curr = curr->next;
+            length++;
+        } while (curr != NULL);
+    }
+    return length;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

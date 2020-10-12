@@ -51,11 +51,15 @@ void free(void *ptr) {
         return;
     }
 
-    // Update counterss
+    // Update counters
     Counters[FREES]++;
 
     // TODO: Try to release block, otherwise insert it into the free list
     Block *block = BLOCK_FROM_POINTER(ptr);
+    if (!block_release(block))
+        free_list_insert(block);
+
+    // Return pointer to previously allocated memory
 }
 
 /**
