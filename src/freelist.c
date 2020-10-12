@@ -37,7 +37,17 @@ Block * free_list_search_ff(size_t size) {
  **/
 Block * free_list_search_bf(size_t size) {
     // TODO: Implement best fit algorithm
-    return NULL;
+    // search through the free list and find chunks of free memory that are as big or bigger than requested size. Return the smallest of these groups
+    Block *BestCandidate = FreeList.next;
+    for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
+        if (curr->capacity >= size){
+            if (curr->capacity < BestCandidate->capacity){
+                BestCandidate = curr;
+            }
+        }
+    }
+            
+    return BestCandidate;
 }
 
 /**
@@ -48,7 +58,16 @@ Block * free_list_search_bf(size_t size) {
  **/
 Block * free_list_search_wf(size_t size) {
     // TODO: Implement worst fit algorithm
-    return NULL;
+    Block *WorstCandidate = FreeList.next;
+    for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
+        if (curr->capacity >= size){
+            if (curr->capacity > WorstCandidate->capacity){
+                WorstCandidate = curr;
+            }
+        }
+    }
+
+    return WorstCandidate;
 }
 
 /**
