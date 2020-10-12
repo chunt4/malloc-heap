@@ -112,6 +112,15 @@ bool	block_merge(Block *dst, Block *src) {
     // TODO: Implement block merge
     // Counters[MERGES]++;
     // Counters[BLOCKS]--;
+    if (src == dst + dst->capacity){
+        dst->capacity += src->capacity;
+        dst->size += src->size;
+        dst->next = src->next;
+
+        Counters[MERGES]++;
+        Counters[BLOCKS]--;
+        return true;
+    }
     return false;
 }
 
