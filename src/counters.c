@@ -80,7 +80,7 @@ double  external_fragmentation() {
     for (Block *block = FreeList.next; block != &FreeList; block = block->next){
         if (block->capacity > largestFree)
             largestFree = block->capacity;
-        totalFree += blck->capacity;
+        totalFree += block->capacity;
     }
 
     if (totalFree == 0)
