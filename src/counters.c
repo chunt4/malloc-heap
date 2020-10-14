@@ -52,7 +52,7 @@ double  internal_fragmentation() {
     if (Counters[HEAP_SIZE] == 0)
         return 0;
 
-    for (Block *block = FreeList.next; block != &FreeList; block->next){
+    for (Block *block = FreeList.next; block != &FreeList; block = block->next){
         if(block->capacity > largestFree)
             largestFree = block->capacity;
         totalFree += block->capacity;
@@ -76,6 +76,9 @@ double  external_fragmentation() {
     // TODO: Implement external fragmentation computation
     size_t largestFree = 0;
     size_t totalFree   = 0;
+    
+    if (Counters[HEAP_SIZE] == 0)
+        return 0;
 
     for (Block *block = FreeList.next; block != &FreeList; block = block->next){
         if (block->capacity > largestFree)
