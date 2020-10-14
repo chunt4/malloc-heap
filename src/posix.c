@@ -72,7 +72,7 @@ void free(void *ptr) {
 void *calloc(size_t nmemb, size_t size) {
     // TODO: Implement calloc
     // Counters[CALLOCS]++;
-    char data[] = malloc(nmemb * size);
+    char *data = malloc(nmemb * size);
     bzero(data, nmemb*size);
     Counters[CALLOCS]++;
     return data;

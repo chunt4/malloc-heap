@@ -56,17 +56,17 @@ bool	block_release(Block *block) {
     // Counters[HEAP_SIZE] -= allocated;
 
     intptr_t endHeap  = (intptr_t)sbrk(0);
-    if (endHeap == SBRK_FAILURE)
+    if (endHeap == (intptr_t)SBRK_FAILURE)
         return false;
 
-    size_t blockPos = block->data + block->capacity;
+    char *blockPos = block->data + block->capacity;
     size_t blockSiz = sizeof(Block) + block->capacity;
 
     if ((intptr_t)blockPos != endHeap || blockSiz < TRIM_THRESHOLD)
         return false;
 
-    allocated = sbrk(blockSiz * -1);
-    if (allocated == SBRK_FAILURE)
+    allocated = (size_t)sbrk(blockSiz * -1);
+    if (allocated == (size_t)SBRK_FAILURE)
         return false;
 
     Counters[BLOCKS]--;
@@ -88,7 +88,7 @@ Block * block_detach(Block *block) {
         Block *after  = block->next;
 
         before->next = after;
-        after->prev = brefore;
+        after->prev = before;
 
         block->prev = block;
         block->next = block;
@@ -143,13 +143,19 @@ Block * block_split(Block *block, size_t size) {
 
     size_t aSize = ALIGN(size);
     if (block->capacity > (aSize + sizeof(Block))){
-        Block *new;
+        Block *new = block;
+        Block *temp = block;
+
         block->capacity -= aSize;
+        block->next = new;
 
         new->capacity = aSize;
         new->size = size;
-        new->prev = block->next;
-        block->next = new;
+        new->prev = block;
+        new->next = temp->next;
+
+        Counters[SPLITS]++;
+        Counters[BLOCKS]++;
     }
     return block;
 }

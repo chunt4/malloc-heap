@@ -121,13 +121,15 @@ void	free_list_insert(Block *block) {
         Block *temp = dst;
 
         // Merge specified block to existing block
-        if (block_merge(dst, block))
+        if (block_merge(dst, block)){
+            block->next = temp->next;
             return;           
+        }
 
         // Merge current block into specified block
         else if (block_merge(block, dst)){
             block->prev = temp->prev;
-            block->next = temp->next;
+            //block->next = temp->next;
             return;
         }
     }
@@ -139,7 +141,7 @@ void	free_list_insert(Block *block) {
     block->next = &FreeList;
     block->prev = tail;
 
-    return 0;
+    return;
 }
 
 /**
