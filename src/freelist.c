@@ -39,17 +39,15 @@ Block * free_list_search_bf(size_t size) {
     // TODO: Implement best fit algorithm
     // search through the free list and find chunks of free memory that are as big or bigger than requested size. Return the smallest of these groups
     Block *BestCandidate = FreeList.next;
-    BestCandidate->capacity = 65535;
+    BestCandidate = &FreeList;
 
     for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
-        if (curr->capacity >= size){
-            if (curr->capacity < BestCandidate->capacity){
-                BestCandidate = curr;
-            }
+        if (curr->capacity >= size && curr->capacity <= BestCandidate->capacity){
+            BestCandidate = curr;
         }
     }
     
-   if (BestCandidate->capacity == 65535)
+   if (BestCandidate == &FreeList)
       return NULL;
 
    return BestCandidate;
@@ -67,15 +65,14 @@ Block * free_list_search_wf(size_t size) {
     WorstCandidate->capacity = 0;
 
     for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
-        if (curr->capacity >= size){
-            if (curr->capacity > WorstCandidate->capacity){
-                WorstCandidate = curr;
-            }
+        if (curr->capacity >= size && curr->capacity > WorstCandidate->capacity){
+            WorstCandidate = curr;
         }
     }
 
     if (WorstCandidate->capacity == 0)
         return NULL;
+
     return WorstCandidate;
 }
 
@@ -117,8 +114,9 @@ Block * free_list_search(size_t size) {
  **/
 void	free_list_insert(Block *block) {
     // TODO: Implement free list insertions
+    Block *temp;
     for (Block *dst = FreeList.next; dst != &FreeList; dst = dst->next){
-        Block *temp = dst;
+        temp = dst;
 
         // Merge specified block to existing block
         if (block_merge(dst, block)){
@@ -151,13 +149,8 @@ void	free_list_insert(Block *block) {
 size_t  free_list_length() {
     // TODO: Implement free list length
     size_t length = 0;
-    Block *curr = FreeList.next;
-    if (curr != NULL){
-        do{
-            curr = curr->next;
-            length++;
-        } while (curr != &FreeList);
-    }
+    for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next)
+       length++; 
     return length;
 }
 
