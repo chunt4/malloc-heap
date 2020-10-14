@@ -86,36 +86,36 @@ void *calloc(size_t nmemb, size_t size) {
  **/
 void *realloc(void *ptr, size_t size) {
     // TODO: Implement realloc
-    if (size==NULL){
-        return NULL;
-    }
-
-    if (ptr==NULL){
-        Counters[MALLOCS]++;
-        return malloc(size);
-    }
-
+    void *newptr;
+    size_t oldSiz = sizeof(ptr)/sizeof(void *);
     if (ptr && size == 0){
-        Counters[FREES]++;
         free(ptr);
         return NULL;
     }
 
-    void * newptr;
-    if (size==ptr->size){
-        newptr = ptr;
+    else if (!ptr){
+        return malloc(size);
     }
 
-    else if (size>ptr->size){
+    else if (size <= oldSiz){
+        Counters[REUSES]++;
+        return ptr;
+    }
+    
+    else{
         // This copies old size into newptr. There is still size-oldsize left as added memory.
-        memcpy(newptr, ptr, ptr->size);
+        newptr = malloc(size);
+        if (newptr){
+            memcpy(newptr, ptr, oldSiz);
+            Counters[REUSES]++;
+            free(ptr);
+        }
+        else{
+            return NULL;
+        }
     }
 
-    else if (size<ptr->size){
-        memcpy(newptr, ptr, size); 
-    }
-
-    // Unless ptr == NULL, it must have been returned by an earlier call to malloc, calloc, or realloc.
+        // Unless ptr == NULL, it must have been returned by an earlier call to malloc, calloc, or realloc.
     //
     // If the area pointed to was moved, free(ptr) is called
     Block *block = BLOCK_FROM_POINTER(newptr);
