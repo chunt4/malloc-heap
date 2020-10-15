@@ -145,19 +145,16 @@ Block * block_split(Block *block, size_t size) {
 
     //size_t aSize = ALIGN(size);
     if (block->capacity > (size + sizeof(Block))){
-        Block *new = block;
-        Block *temp = block;
-
-        block->capacity = (size + sizeof(Block));
-        block->next = new;
-
-        new->capacity = (block->size - size + sizeof(Block));
-        new->size = block->size - size;
+        Block *new = block + ALIGN(size);
+        new->size = block->capacity - sizeof(Block) - ALIGN(size);
+        new->capacity = ALIGN(new->size);
+        new->next = block->next;
         new->prev = block;
-        new->next = temp->next;
 
+        block->capacity = ALIGN(size);
         block->size = size;
-
+        block->next = new;
+       
         Counters[SPLITS]++;
         Counters[BLOCKS]++;
     }
