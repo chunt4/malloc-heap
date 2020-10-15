@@ -101,7 +101,7 @@ Block * block_detach(Block *block) {
  *
  *  1. Compute end of destination and start of source.
  *
- *  2. If they both match, then merge source into destionation by giving the
+ *  2. If they both match, then merge source into destination by giving the
  *  destination all of the memory allocated to source.
  *
  * @param   dst     Destination block we are merging into.
@@ -112,7 +112,8 @@ bool	block_merge(Block *dst, Block *src) {
     // TODO: Implement block merge
     // Counters[MERGES]++;
     // Counters[BLOCKS]--;
-    if (src == dst + dst->capacity){
+
+    if ((intptr_t)src == sizeof(Block) + (intptr_t)dst + dst->capacity){
         dst->capacity += src->capacity;
         dst->size += src->size;
         dst->next = src->next;
@@ -121,6 +122,7 @@ bool	block_merge(Block *dst, Block *src) {
         Counters[BLOCKS]--;
         return true;
     }
+
     return false;
 }
 
@@ -141,18 +143,20 @@ Block * block_split(Block *block, size_t size) {
     // Counters[SPLITS]++;
     // Counters[BLOCKS]++;
 
-    size_t aSize = ALIGN(size);
-    if (block->capacity > (aSize + sizeof(Block))){
+    //size_t aSize = ALIGN(size);
+    if (block->capacity > (size + sizeof(Block))){
         Block *new = block;
         Block *temp = block;
 
-        block->capacity -= aSize;
+        block->capacity = (size + sizeof(Block));
         block->next = new;
 
-        new->capacity = aSize;
-        new->size = size;
+        new->capacity = (block->size - size + sizeof(Block));
+        new->size = block->size - size;
         new->prev = block;
         new->next = temp->next;
+
+        block->size = size;
 
         Counters[SPLITS]++;
         Counters[BLOCKS]++;
