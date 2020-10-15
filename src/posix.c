@@ -21,7 +21,15 @@ void *malloc(size_t size) {
     }
 
     // TODO: Search free list for any available block with matching size
-    Block *block = block_allocate(size);
+    Block *block = free_list_search(size);
+    if (block){
+        block = block_split(block, size);
+        block = block_detach(block);
+    }
+    
+    else{
+        block = block_allocate(size);
+    }
 
     // Could not find free block or allocate a block, so just return NULL
     if (!block) {

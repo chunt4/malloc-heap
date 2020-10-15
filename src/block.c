@@ -144,8 +144,8 @@ Block * block_split(Block *block, size_t size) {
     // Counters[BLOCKS]++;
 
     //size_t aSize = ALIGN(size);
-    if (block->capacity > (size + sizeof(Block))){
-        Block *new = block + ALIGN(size);
+    if (block->capacity > (ALIGN(size) + sizeof(Block))){
+        Block *new = (Block *)(block->data + ALIGN(size));
         new->size = block->capacity - sizeof(Block) - ALIGN(size);
         new->capacity = ALIGN(new->size);
         new->next = block->next;
@@ -157,6 +157,9 @@ Block * block_split(Block *block, size_t size) {
        
         Counters[SPLITS]++;
         Counters[BLOCKS]++;
+    }
+    else{
+        block->size = size;
     }
     return block;
 }
