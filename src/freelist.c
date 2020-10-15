@@ -114,20 +114,26 @@ Block * free_list_search(size_t size) {
  **/
 void	free_list_insert(Block *block) {
     // TODO: Implement free list insertions
-    Block *temp;
+    //Block *temp;
     for (Block *dst = FreeList.next; dst != &FreeList; dst = dst->next){
-        temp = dst;
+        //temp = dst;
 
         // Merge specified block to existing block
         if (block_merge(dst, block)){
-            block->next = temp->next;
+            /*block->prev = dst->prev;
+            block->next = dst->next;
+            block->prev->next = block;
+            block->next->prev = block;*/
+
             return;           
         }
 
         // Merge current block into specified block
         else if (block_merge(block, dst)){
-            block->prev = temp->prev;
-            //block->next = temp->next;
+            block->prev = dst->prev;
+            block->next = dst->next;
+            block->prev->next = block;
+            block->next->prev = block;
             return;
         }
     }
