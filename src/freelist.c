@@ -39,12 +39,11 @@ Block * free_list_search_bf(size_t size) {
     // TODO: Implement best fit algorithm
     // search through the free list and find chunks of free memory that are as big or bigger than requested size. Return the smallest of these groups
     Block *BestCandidate = FreeList.next;
-    BestCandidate = &FreeList;
-
+    BestCandidate = &FreeList; 
+    
     for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
-        if (curr->capacity >= size && curr->capacity <= BestCandidate->capacity){
+        if (curr->capacity >= size && curr->capacity <= BestCandidate->capacity)
             BestCandidate = curr;
-        }
     }
     
    if (BestCandidate == &FreeList)
@@ -62,7 +61,11 @@ Block * free_list_search_bf(size_t size) {
 Block * free_list_search_wf(size_t size) {
     // TODO: Implement worst fit algorithm
     Block *WorstCandidate = FreeList.next;
-    WorstCandidate->capacity = 0;
+    //WorstCandidate->capacity = 0;
+    //WorstCandidate = &FreeList;
+
+    if (WorstCandidate == &FreeList)
+        return NULL;
 
     for (Block *curr = FreeList.next; curr != &FreeList; curr = curr->next){
         if (curr->capacity >= size && curr->capacity > WorstCandidate->capacity){
@@ -70,10 +73,10 @@ Block * free_list_search_wf(size_t size) {
         }
     }
 
-    if (WorstCandidate->capacity == 0)
-        return NULL;
+    if (WorstCandidate->capacity >= size)
+        return WorstCandidate;
 
-    return WorstCandidate;
+    return NULL;
 }
 
 /**
@@ -117,23 +120,19 @@ void	free_list_insert(Block *block) {
     //Block *temp;
     for (Block *dst = FreeList.next; dst != &FreeList; dst = dst->next){
         //temp = dst;
+        Block *temp = dst;
 
         // Merge specified block to existing block
         if (block_merge(dst, block)){
-            /*block->prev = dst->prev;
-            block->next = dst->next;
-            block->prev->next = block;
-            block->next->prev = block;*/
-
             return;           
         }
 
         // Merge current block into specified block
         else if (block_merge(block, dst)){
-            block->prev = dst->prev;
-            block->next = dst->next;
-            block->prev->next = block;
-            block->next->prev = block;
+            block->prev = temp->prev;
+            block->next = temp->next;
+            dst->prev->next = block;
+            dst->next->prev = block;
             return;
         }
     }

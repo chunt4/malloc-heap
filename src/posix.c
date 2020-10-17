@@ -29,6 +29,8 @@ void *malloc(size_t size) {
     
     else{
         block = block_allocate(size);
+        if (!block)
+            return NULL;
     }
 
     // Could not find free block or allocate a block, so just return NULL
@@ -94,9 +96,11 @@ void *calloc(size_t nmemb, size_t size) {
  **/
 void *realloc(void *ptr, size_t size) {
     // TODO: Implement realloc
+    Counters[REALLOCS]++;
+    Block *blockptr = BLOCK_FROM_POINTER(ptr);
     void *newptr;
-    size_t oldSiz = sizeof(ptr)/sizeof(void *);
-    if (ptr && size == 0){
+
+    if(size==0){
         free(ptr);
         return NULL;
     }
@@ -105,8 +109,7 @@ void *realloc(void *ptr, size_t size) {
         return malloc(size);
     }
 
-    else if (size <= oldSiz){
-        Counters[REUSES]++;
+    else if (size <= blockptr->size){
         return ptr;
     }
     
@@ -114,21 +117,15 @@ void *realloc(void *ptr, size_t size) {
         // This copies old size into newptr. There is still size-oldsize left as added memory.
         newptr = malloc(size);
         if (newptr){
-            memcpy(newptr, ptr, oldSiz);
-            Counters[REUSES]++;
+            if (!memcpy(newptr, blockptr, blockptr->size))
+                return NULL;
             free(ptr);
         }
-        else{
+        else
             return NULL;
-        }
     }
 
-        // Unless ptr == NULL, it must have been returned by an earlier call to malloc, calloc, or realloc.
-    //
-    // If the area pointed to was moved, free(ptr) is called
-    Block *block = BLOCK_FROM_POINTER(newptr);
-    Counters[REALLOCS]++;
-    return block->data;
+    return newptr;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */
