@@ -3,6 +3,8 @@
 
 This is [Project 03] of [CSE.30341.FA20].
 
+LINK: https://youtu.be/ecOIbRDqTw8
+
 ## Students
 
 1. Jake Hracho (jhracho@nd.edu)

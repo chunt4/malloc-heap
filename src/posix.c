@@ -21,7 +21,17 @@ void *malloc(size_t size) {
     }
 
     // TODO: Search free list for any available block with matching size
-    Block *block = block_allocate(size);
+    Block *block = free_list_search(size);
+    if (block){
+        block = block_split(block, size);
+        block = block_detach(block);
+    }
+    
+    else{
+        block = block_allocate(size);
+        if (!block)
+            return NULL;
+    }
 
     // Could not find free block or allocate a block, so just return NULL
     if (!block) {
@@ -86,41 +96,36 @@ void *calloc(size_t nmemb, size_t size) {
  **/
 void *realloc(void *ptr, size_t size) {
     // TODO: Implement realloc
-    if (size==NULL){
-        return NULL;
-    }
+    Counters[REALLOCS]++;
+    Block *blockptr = BLOCK_FROM_POINTER(ptr);
+    void *newptr;
 
-    if (ptr==NULL){
-        Counters[MALLOCS]++;
-        return malloc(size);
-    }
-
-    if (ptr && size == 0){
-        Counters[FREES]++;
+    if(size==0){
         free(ptr);
         return NULL;
     }
 
-    void * newptr;
-    if (size==ptr->size){
-        newptr = ptr;
+    else if (!ptr){
+        return malloc(size);
     }
 
-    else if (size>ptr->size){
+    else if (size <= blockptr->size){
+        return ptr;
+    }
+    
+    else{
         // This copies old size into newptr. There is still size-oldsize left as added memory.
-        memcpy(newptr, ptr, ptr->size);
+        newptr = malloc(size);
+        if (newptr){
+            if (!memcpy(newptr, blockptr, blockptr->size))
+                return NULL;
+            free(ptr);
+        }
+        else
+            return NULL;
     }
 
-    else if (size<ptr->size){
-        memcpy(newptr, ptr, size); 
-    }
-
-    // Unless ptr == NULL, it must have been returned by an earlier call to malloc, calloc, or realloc.
-    //
-    // If the area pointed to was moved, free(ptr) is called
-    Block *block = BLOCK_FROM_POINTER(newptr);
-    Counters[REALLOCS]++;
-    return block->data;
+    return newptr;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

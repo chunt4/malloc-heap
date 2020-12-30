@@ -59,20 +59,22 @@ bool	block_release(Block *block) {
     if (endHeap == (intptr_t)SBRK_FAILURE)
         return false;
 
-    char *blockPos = block->data + block->capacity;
-    size_t blockSiz = sizeof(Block) + block->capacity;
-
-    if ((intptr_t)blockPos != endHeap || blockSiz < TRIM_THRESHOLD)
-        return false;
-
-    allocated = (size_t)sbrk(blockSiz * -1);
-    if (allocated == (size_t)SBRK_FAILURE)
-        return false;
-
-    Counters[BLOCKS]--;
-    Counters[SHRINKS]++;
-    Counters[HEAP_SIZE] -= blockSiz;
-    return true;
+    intptr_t blockPos = (intptr_t)block->data + block->capacity;
+   
+    if (blockPos == endHeap && block->capacity >= TRIM_THRESHOLD){
+        Block *detach = block_detach(block);
+        if (!detach)
+            return false;
+    
+        allocated = block->capacity + sizeof(Block);
+       
+        Counters[BLOCKS]--;
+        Counters[SHRINKS]++;
+        Counters[HEAP_SIZE] -= allocated;
+        sbrk(allocated * -1);
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -101,7 +103,7 @@ Block * block_detach(Block *block) {
  *
  *  1. Compute end of destination and start of source.
  *
- *  2. If they both match, then merge source into destionation by giving the
+ *  2. If they both match, then merge source into destination by giving the
  *  destination all of the memory allocated to source.
  *
  * @param   dst     Destination block we are merging into.
@@ -112,15 +114,17 @@ bool	block_merge(Block *dst, Block *src) {
     // TODO: Implement block merge
     // Counters[MERGES]++;
     // Counters[BLOCKS]--;
-    if (src == dst + dst->capacity){
-        dst->capacity += src->capacity;
-        dst->size += src->size;
-        dst->next = src->next;
+
+    if ((intptr_t)src == sizeof(Block) + (intptr_t)dst + dst->capacity){
+        dst->capacity += src->capacity + sizeof(Block);
+        //dst->size += src->size;
+        //dst->next = src->next;
 
         Counters[MERGES]++;
         Counters[BLOCKS]--;
         return true;
     }
+
     return false;
 }
 
@@ -141,21 +145,24 @@ Block * block_split(Block *block, size_t size) {
     // Counters[SPLITS]++;
     // Counters[BLOCKS]++;
 
-    size_t aSize = ALIGN(size);
-    if (block->capacity > (aSize + sizeof(Block))){
-        Block *new = block;
-        Block *temp = block;
-
-        block->capacity -= aSize;
-        block->next = new;
-
-        new->capacity = aSize;
-        new->size = size;
+    //size_t aSize = ALIGN(size);
+    if (block->capacity > (ALIGN(size) + sizeof(Block))){
+        Block *new = (Block *)(block->data + ALIGN(size));
+        new->size = block->capacity - sizeof(Block) - ALIGN(size);
+        new->capacity = ALIGN(new->size);
+        new->next = block->next;
         new->prev = block;
-        new->next = temp->next;
+        block->next->prev = new;
 
+        block->capacity = ALIGN(size);
+        block->size = size;
+        block->next = new;
+       
         Counters[SPLITS]++;
         Counters[BLOCKS]++;
+    }
+    else{
+        block->size = size;
     }
     return block;
 }
